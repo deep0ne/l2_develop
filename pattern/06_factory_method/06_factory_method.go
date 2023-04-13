@@ -14,13 +14,11 @@ import "fmt"
 type SQLQuery interface {
 	setQuery(query string)
 	setQueryType(queryType string)
-	setDB(db string)
 }
 
 type Query struct {
 	query     string
 	queryType string
-	db        string
 }
 
 func (q *Query) setQuery(query string) {
@@ -31,10 +29,6 @@ func (q *Query) setQueryType(queryType string) {
 	q.queryType = queryType
 }
 
-func (q *Query) setDB(db string) {
-	q.db = db
-}
-
 type GetSQLQuery struct {
 	Query
 }
@@ -43,41 +37,39 @@ type DeleteSQLQuery struct {
 	Query
 }
 
-func newGET(id int) SQLQuery {
+func newGET(id int, db string) SQLQuery {
 	return &GetSQLQuery{
 		Query: Query{
-			query:     fmt.Sprintf("SELECT * FROM orders WHERE order_uid = %d", id),
+			query:     fmt.Sprintf("SELECT * FROM %s WHERE order_uid = %d", db, id),
 			queryType: "GET",
-			db:        "orders",
 		},
 	}
 }
 
-func newDELETE(id int) SQLQuery {
+func newDELETE(id int, db string) SQLQuery {
 	return &DeleteSQLQuery{
 		Query: Query{
-			query:     fmt.Sprintf("DELETE FROM orders WHERE order_uid = %d", id),
+			query:     fmt.Sprintf("DELETE FROM %s WHERE order_uid = %d", db, id),
 			queryType: "DELETE",
-			db:        "orders",
 		},
 	}
 }
 
-func getQuery(queryType string, id int) (SQLQuery, error) {
+func getQuery(queryType, db string, id int) (SQLQuery, error) {
 	if queryType == "GET" {
-		return newGET(id), nil
+		return newGET(id, db), nil
 	}
 
 	if queryType == "DELETE" {
-		return newDELETE(id), nil
+		return newDELETE(id, db), nil
 	}
 
 	return nil, fmt.Errorf("Wrong type of query passed")
 }
 
 func main() {
-	getOrder, _ := getQuery("GET", 12)
-	deleteOrder, _ := getQuery("DELETE", 12)
+	getOrder, _ := getQuery("GET", "orders", 12)
+	deleteOrder, _ := getQuery("DELETE", "orders", 12)
 
 	fmt.Println(getOrder)
 	fmt.Println(deleteOrder)
