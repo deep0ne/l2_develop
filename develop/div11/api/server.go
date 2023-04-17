@@ -47,7 +47,7 @@ func (server *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ID, event, err := util.CreateEventParser(r)
+	ID, event, err := util.EventParser(r)
 	if err != nil {
 		util.JSONError(w, err, http.StatusInternalServerError)
 		return
@@ -60,9 +60,28 @@ func (server *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) updateEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		util.JSONError(w, errors.New("Method not allowed"), http.StatusMethodNotAllowed)
 		return
 	}
+	ID, event, err := util.EventParser(r)
+	if err != nil {
+		util.JSONError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	events, ok := server.Store[ID]
+	if !ok {
+		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusBadRequest)
+		return
+	}
+
+	for i, e := range events {
+		if e.Name == event.Name {
+			events[i].Date = event.Date
+		}
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Время встречи '%s' у юзера %d успешно обновлено", event.Name, ID)})
 }
 
 func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
@@ -70,6 +89,28 @@ func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	ID, event, err := util.EventParser(r)
+	if err != nil {
+		util.JSONError(w, err, http.StatusInternalServerError)
+		return
+	}
+	events, ok := server.Store[ID]
+	if !ok {
+		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusBadRequest)
+		return
+	}
+	for i, e := range events {
+		if e.Name == event.Name {
+			events = append(events[:i], events[i+1:]...)
+		}
+	}
+
+	if len(events) == 0 {
+		delete(server.Store, ID)
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Встреча '%s' у юзера %d успешно удалена", event.Name, ID)})
 }
 
 func (server *Server) getEvents(w http.ResponseWriter, r *http.Request) {

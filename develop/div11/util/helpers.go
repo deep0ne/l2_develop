@@ -12,7 +12,7 @@ import (
 
 const timeLayout = "2006-01-02"
 
-func CreateEventParser(r *http.Request) (int, domain.Event, error) {
+func EventParser(r *http.Request) (int, domain.Event, error) {
 	err := r.ParseForm()
 
 	if err != nil {
@@ -70,7 +70,7 @@ func GetEventsByDate(events []domain.Event, date string, days int) ([]domain.Eve
 	for _, event := range events {
 		switch days {
 		case 1:
-			if t == event.Date {
+			if t.Equal(event.Date) {
 				eventsByDate = append(eventsByDate, event)
 			}
 		case 7:
@@ -83,5 +83,5 @@ func GetEventsByDate(events []domain.Event, date string, days int) ([]domain.Eve
 			}
 		}
 	}
-	return events, nil
+	return eventsByDate, nil
 }
