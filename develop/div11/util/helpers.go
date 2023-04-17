@@ -41,16 +41,22 @@ func CreateEventParser(r *http.Request) (int, domain.Event, error) {
 func JSONError(w http.ResponseWriter, err error, code int) {
 	errJSON := make(map[string]string)
 	errJSON["error"] = err.Error()
-	bytes, _ := json.Marshal(errJSON)
+	bytes, _ := json.MarshalIndent(errJSON, "", "\t")
+
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
+
 	fmt.Fprintln(w, string(bytes))
 }
 
-func JSONWriter(w http.ResponseWriter, events []domain.Event) {
+func JSONWriter(w http.ResponseWriter, events []domain.Event, statusCode int) {
 	resp := make(map[string][]domain.Event)
 	resp["result"] = events
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(statusCode)
+
 	bytes, _ := json.MarshalIndent(resp, "", "\t")
 	w.Write(bytes)
 }

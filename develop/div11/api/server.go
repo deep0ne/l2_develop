@@ -16,17 +16,15 @@ const (
 	MONTH = 30
 )
 
-type userInfo map[int][]domain.Event
-
 type Server struct {
 	Config util.Config
-	Store  userInfo
+	Store  domain.UserInfo
 }
 
 func NewServer(config util.Config) *Server {
 	return &Server{
 		Config: config,
-		Store:  make(userInfo),
+		Store:  make(domain.UserInfo),
 	}
 }
 
@@ -105,5 +103,5 @@ func (server *Server) getEvents(w http.ResponseWriter, r *http.Request) {
 		events, err = util.GetEventsByDate(event, date, MONTH)
 	}
 
-	util.JSONWriter(w, events)
+	util.JSONWriter(w, events, http.StatusOK)
 }

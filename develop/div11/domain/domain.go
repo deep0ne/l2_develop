@@ -9,7 +9,4 @@ type Event struct {
 	Date time.Time `json:"Время встречи"`
 }
 
-type User struct {
-	ID     int
-	Events []Event
-}
+type UserInfo map[int][]Event
