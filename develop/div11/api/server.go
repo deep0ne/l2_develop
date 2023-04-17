@@ -10,15 +10,23 @@ import (
 	"strconv"
 )
 
+const (
+	DAY   = 1
+	WEEK  = 7
+	MONTH = 30
+)
+
+type userInfo map[int][]domain.Event
+
 type Server struct {
 	Config util.Config
-	Store  map[int][]domain.Event
+	Store  userInfo
 }
 
 func NewServer(config util.Config) *Server {
 	return &Server{
 		Config: config,
-		Store:  make(map[int][]domain.Event),
+		Store:  make(userInfo),
 	}
 }
 
@@ -28,9 +36,9 @@ func (server *Server) NewRouter() *http.ServeMux {
 	mux.Handle("/create_event", http.HandlerFunc(server.createEvent))
 	mux.Handle("/update_event", http.HandlerFunc(server.updateEvent))
 	mux.Handle("/delete_event", http.HandlerFunc(server.deleteEvent))
-	mux.Handle("/events_for_day", http.HandlerFunc(server.getEventsForDay))
-	mux.Handle("/events_for_week", http.HandlerFunc(server.getEventsForWeek))
-	mux.Handle("/events_for_month", http.HandlerFunc(server.getEventsForMonth))
+	mux.Handle("/events_for_day", http.HandlerFunc(server.getEvents))
+	mux.Handle("/events_for_week", http.HandlerFunc(server.getEvents))
+	mux.Handle("/events_for_month", http.HandlerFunc(server.getEvents))
 
 	return mux
 }
@@ -66,7 +74,7 @@ func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (server *Server) getEventsForDay(w http.ResponseWriter, r *http.Request) {
+func (server *Server) getEvents(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		util.JSONError(w, errors.New("Method not allowed"), http.StatusMethodNotAllowed)
 		return
@@ -84,20 +92,18 @@ func (server *Server) getEventsForDay(w http.ResponseWriter, r *http.Request) {
 		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusBadRequest)
 		return
 	}
+
 	date := req.Get("date")
-	util.JSONEventsResponse(w, event, date, 1)
-}
+	events := make([]domain.Event, 0)
 
-func (server *Server) getEventsForWeek(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
+	switch r.URL.Path {
+	case "/events_for_day":
+		events, err = util.GetEventsByDate(event, date, DAY)
+	case "/events_for_week":
+		events, err = util.GetEventsByDate(event, date, WEEK)
+	case "/events_for_month":
+		events, err = util.GetEventsByDate(event, date, MONTH)
 	}
-}
 
-func (server *Server) getEventsForMonth(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	util.JSONWriter(w, events)
 }

@@ -48,29 +48,34 @@ func JSONError(w http.ResponseWriter, err error, code int) {
 	fmt.Fprintln(w, string(bytes))
 }
 
-func JSONEventsResponse(w http.ResponseWriter, events []domain.Event, date string, days int) {
+func JSONWriter(w http.ResponseWriter, events []domain.Event) {
 	resp := make(map[string][]domain.Event)
+	resp["result"] = events
+	bytes, _ := json.MarshalIndent(resp, "", "\t")
+	w.Write(bytes)
+}
+
+func GetEventsByDate(events []domain.Event, date string, days int) ([]domain.Event, error) {
+	eventsByDate := make([]domain.Event, 0)
 	t, err := time.Parse(timeLayout, date)
 	if err != nil {
-		JSONError(w, errors.New("Невалидный формат даты"), http.StatusBadRequest)
+		return nil, err
 	}
 	for _, event := range events {
 		switch days {
 		case 1:
 			if t == event.Date {
-				resp["result"] = append(resp["result"], event)
+				eventsByDate = append(eventsByDate, event)
 			}
 		case 7:
 			if event.Date.Sub(t).Hours()/24 <= 7 {
-				resp["result"] = append(resp["result"], event)
+				eventsByDate = append(eventsByDate, event)
 			}
 		case 30:
 			if event.Date.Sub(t).Hours()/24 <= 30 {
-				resp["result"] = append(resp["result"], event)
+				eventsByDate = append(eventsByDate, event)
 			}
 		}
-
 	}
-	bytes, _ := json.MarshalIndent(resp, "", "\t")
-	w.Write(bytes)
+	return events, nil
 }

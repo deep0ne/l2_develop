@@ -5,7 +5,7 @@ import (
 )
 
 type Event struct {
-	Name string    `json:"Имя встречи"`
+	Name string    `json:"Название встречи"`
 	Date time.Time `json:"Время встречи"`
 }
 
