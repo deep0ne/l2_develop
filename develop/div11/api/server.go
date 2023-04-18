@@ -54,7 +54,7 @@ func (server *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 
 	ID, event, err := util.EventParser(r)
 	if err != nil {
-		util.JSONError(w, err, http.StatusInternalServerError)
+		util.JSONError(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -70,13 +70,13 @@ func (server *Server) updateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	ID, event, err := util.EventParser(r)
 	if err != nil {
-		util.JSONError(w, err, http.StatusInternalServerError)
+		util.JSONError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	events, ok := server.Store[ID]
 	if !ok {
-		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusBadRequest)
+		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusInternalServerError)
 		return
 	}
 
@@ -91,18 +91,18 @@ func (server *Server) updateEvent(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		util.JSONError(w, errors.New("Method not allowed"), http.StatusMethodNotAllowed)
 		return
 	}
 
 	ID, event, err := util.EventParser(r)
 	if err != nil {
-		util.JSONError(w, err, http.StatusInternalServerError)
+		util.JSONError(w, err, http.StatusBadRequest)
 		return
 	}
 	events, ok := server.Store[ID]
 	if !ok {
-		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusBadRequest)
+		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusInternalServerError)
 		return
 	}
 	for i, e := range events {
@@ -133,7 +133,7 @@ func (server *Server) getEvents(w http.ResponseWriter, r *http.Request) {
 
 	event, ok := server.Store[id]
 	if !ok {
-		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusBadRequest)
+		util.JSONError(w, errors.New("Юзера с таким ID не существует"), http.StatusInternalServerError)
 		return
 	}
 
