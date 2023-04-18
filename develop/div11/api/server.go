@@ -2,12 +2,15 @@ package api
 
 import (
 	"div11/domain"
+	"div11/middleware"
 	"div11/util"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -19,24 +22,26 @@ const (
 type Server struct {
 	Config util.Config
 	Store  domain.UserInfo
+	Logger *logrus.Logger
 }
 
 func NewServer(config util.Config) *Server {
 	return &Server{
 		Config: config,
 		Store:  make(domain.UserInfo),
+		Logger: util.NewLogger(),
 	}
 }
 
 func (server *Server) NewRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.Handle("/create_event", http.HandlerFunc(server.createEvent))
-	mux.Handle("/update_event", http.HandlerFunc(server.updateEvent))
-	mux.Handle("/delete_event", http.HandlerFunc(server.deleteEvent))
-	mux.Handle("/events_for_day", http.HandlerFunc(server.getEvents))
-	mux.Handle("/events_for_week", http.HandlerFunc(server.getEvents))
-	mux.Handle("/events_for_month", http.HandlerFunc(server.getEvents))
+	mux.Handle("/create_event", middleware.LoggingMiddleware(server.Logger, http.HandlerFunc(server.createEvent)))
+	mux.Handle("/update_event", middleware.LoggingMiddleware(server.Logger, http.HandlerFunc(server.updateEvent)))
+	mux.Handle("/delete_event", middleware.LoggingMiddleware(server.Logger, http.HandlerFunc(server.deleteEvent)))
+	mux.Handle("/events_for_day", middleware.LoggingMiddleware(server.Logger, http.HandlerFunc(server.getEvents)))
+	mux.Handle("/events_for_week", middleware.LoggingMiddleware(server.Logger, http.HandlerFunc(server.getEvents)))
+	mux.Handle("/events_for_month", middleware.LoggingMiddleware(server.Logger, http.HandlerFunc(server.getEvents)))
 
 	return mux
 }
