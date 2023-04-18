@@ -13,11 +13,11 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		scanner.Scan()
-		text := strings.Split(scanner.Text(), " ")
-		command := text[0]
+		arguments := strings.Split(scanner.Text(), " ")
+		command := arguments[0]
 		switch command {
 		case "cd":
-			err := os.Chdir(text[1])
+			err := os.Chdir(arguments[1])
 			if err != nil {
 				fmt.Println("Cannot change directory. Change your input.")
 				fmt.Println("Type \"pwd\" if you want to know your current directory")
@@ -31,17 +31,18 @@ func main() {
 			fmt.Println(dir)
 
 		case "echo":
-			fmt.Println(strings.Join(text[1:], " "))
+			fmt.Println(strings.Join(arguments[1:], " "))
 
 		case "ps":
-			processes, err := exec.Command("ps", text[1:]...).Output()
+			processes, err := exec.Command("ps", arguments[1:]...).Output()
 			if err != nil {
 				fmt.Println("There are no processes")
 			}
 			fmt.Println(string(processes))
+
 		case "kill":
 			var pid int
-			for _, arg := range text[1:] {
+			for _, arg := range arguments[1:] {
 				if arg[0] != '-' {
 					pidConverted, err := strconv.Atoi(arg)
 					if err != nil {
@@ -60,6 +61,18 @@ func main() {
 				fmt.Println("Could not kill process. Are you sure your PID is correct?")
 			} else {
 				fmt.Printf("Process %d is killed!\n", pid)
+			}
+
+		case "exec":
+			if len(arguments[1:]) > 1 {
+				fmt.Println("Too many arguments.")
+				fmt.Println("Exec usage: exec firefox")
+			}
+			cmd := exec.Command(arguments[1])
+			err := cmd.Run()
+			if err != nil {
+				fmt.Println("Wrong argument for exec.")
+
 			}
 		case "quit":
 			return
