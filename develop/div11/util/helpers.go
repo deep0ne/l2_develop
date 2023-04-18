@@ -58,7 +58,10 @@ func JSONWriter(w http.ResponseWriter, events []domain.Event, statusCode int) {
 	w.WriteHeader(statusCode)
 
 	bytes, _ := json.MarshalIndent(resp, "", "\t")
-	w.Write(bytes)
+	_, err := w.Write(bytes)
+	if err != nil {
+		JSONError(w, err, http.StatusInternalServerError)
+	}
 }
 
 func GetEventsByDate(events []domain.Event, date string, days int) ([]domain.Event, error) {

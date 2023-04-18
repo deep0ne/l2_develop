@@ -3,6 +3,7 @@ package main
 import (
 	"div11/api"
 	"div11/util"
+	"log"
 	"net/http"
 )
 
@@ -14,5 +15,8 @@ func main() {
 		Addr:    api.Config.ServerAddress,
 		Handler: router,
 	}
-	server.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -60,7 +60,10 @@ func (server *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 
 	server.Store[ID] = append(server.Store[ID], event)
 
-	json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Event Юзера %d создан успешно", ID)})
+	err = json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Event Юзера %d создан успешно", ID)})
+	if err != nil {
+		util.JSONError(w, err, http.StatusInternalServerError)
+	}
 }
 
 func (server *Server) updateEvent(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +89,10 @@ func (server *Server) updateEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Время встречи '%s' у юзера %d успешно обновлено", event.Name, ID)})
+	err = json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Время встречи '%s' у юзера %d успешно обновлено", event.Name, ID)})
+	if err != nil {
+		util.JSONError(w, err, http.StatusInternalServerError)
+	}
 }
 
 func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
@@ -115,7 +121,10 @@ func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
 		delete(server.Store, ID)
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Встреча '%s' у юзера %d успешно удалена", event.Name, ID)})
+	err = json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Встреча '%s' у юзера %d успешно удалена", event.Name, ID)})
+	if err != nil {
+		util.JSONError(w, err, http.StatusInternalServerError)
+	}
 }
 
 func (server *Server) getEvents(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +156,9 @@ func (server *Server) getEvents(w http.ResponseWriter, r *http.Request) {
 		events, err = util.GetEventsByDate(event, date, WEEK)
 	case "/events_for_month":
 		events, err = util.GetEventsByDate(event, date, MONTH)
+	}
+	if err != nil {
+		util.JSONError(w, err, http.StatusInternalServerError)
 	}
 
 	util.JSONWriter(w, events, http.StatusOK)
