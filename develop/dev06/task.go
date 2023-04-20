@@ -63,7 +63,7 @@ func main() {
 
 	flag.Var(&Fields, "f", "Usage: choose columns. Number (int) of column must be >= 1 and <= total number of columns")
 	flag.StringVar(&DelimeterFlag, "d", "\t", "Usage: choose a delimeter")
-	flag.BoolVar(&SeparatedFlag, "s", false, "Usage: type \"-s=true/false\". When true, lines without delimeter won't be in the output.")
+	flag.BoolVar(&SeparatedFlag, "s", true, "Usage: type \"-s=true/false\". When true, lines without delimeter won't be in the output.")
 	flag.Parse()
 	if Fields == nil {
 		log.Fatal("You must provide number of fields.")
