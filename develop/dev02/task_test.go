@@ -57,6 +57,10 @@ func TestUnpack(t *testing.T) {
 			input:    "\\\\",
 			expected: "\\",
 		},
+		{
+			input:    "\\",
+			expected: "",
+		},
 	}
 	for i := range testCases {
 		tc := testCases[i]
