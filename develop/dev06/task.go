@@ -33,6 +33,7 @@ func (i *fieldFlags) Set(value string) error {
 func Cut(fields fieldFlags, delimeter string, separated bool) error {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
+		matches := make([]string, 0, len(scanner.Text()))
 		if err := scanner.Err(); err != nil {
 			if err == io.EOF {
 				break
@@ -45,13 +46,36 @@ func Cut(fields fieldFlags, delimeter string, separated bool) error {
 
 		for _, f := range fields {
 			if f > len(line) || f < 1 {
-				return errors.New("You chose wrong number for fields. See usage.")
+				if !separated {
+					continue
+				} else {
+					return errors.New("You chose wrong number for fields. See usage.")
+				}
 			}
-			fmt.Print(line[f-1], " ")
+			matches = append(matches, line[f-1])
 		}
-		fmt.Println()
+		fmt.Println(strings.Join(matches, delimeter))
 	}
 	return nil
+}
+
+func CutForTests(pattern string, fields fieldFlags, delimeter string, separated bool) (string, error) {
+
+	line := strings.Split(pattern, delimeter)
+	if len(line) == 1 {
+		if separated {
+			return "", nil
+		}
+		return pattern, nil
+	}
+	words := make([]string, 0)
+	for _, f := range fields {
+		if f > len(line) || f < 1 {
+			return "", errors.New("You chose wrong number for fields. See usage.")
+		}
+		words = append(words, line[f-1])
+	}
+	return strings.Join(words, delimeter), nil
 }
 
 func main() {
