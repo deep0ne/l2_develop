@@ -1,0 +1,3 @@
+this is string number one
+then comes stringzzz with subpattern
+then string with only one word before it

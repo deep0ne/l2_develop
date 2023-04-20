@@ -44,8 +44,16 @@ func FormRegex(pattern string, options SearchOptions) string {
 	return regex
 }
 
-func Grep(regex *regexp.Regexp, file *os.File, options SearchOptions) error {
-	var iterate int
+func Grep(regex *regexp.Regexp, file *os.File, options SearchOptions, testmode bool) error {
+	var (
+		iterate    int
+		outputFile *os.File
+	)
+	if testmode {
+		outputFile, _ = os.Create("output.txt")
+		defer outputFile.Close()
+	}
+
 	scanner := bufio.NewScanner(file)
 	findings := make([]string, 0, options.CountFlag)
 
@@ -82,10 +90,19 @@ func Grep(regex *regexp.Regexp, file *os.File, options SearchOptions) error {
 	}
 
 	for line := 0; line < iterate; line++ {
-		if options.LineNumFlag {
-			fmt.Print(line+1, ": ")
+		if testmode {
+			if options.LineNumFlag {
+				s := strconv.Itoa(line+1) + ": "
+				outputFile.WriteString(s)
+			}
+			outputFile.WriteString(findings[line])
+			outputFile.WriteString("\n")
+		} else {
+			if options.LineNumFlag {
+				fmt.Println(line+1, ": ")
+			}
+			fmt.Println(findings[line])
 		}
-		fmt.Println(findings[line])
 	}
 	return nil
 }

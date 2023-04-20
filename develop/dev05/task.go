@@ -46,11 +46,13 @@ func main() {
 
 	regex := grep.FormRegex(search, searchOptions)
 	re := regexp.MustCompile(regex)
+	fmt.Println(re)
 
-	file, err := os.Open("words.txt")
+	file, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = grep.Grep(re, file, searchOptions)
+
+	err = grep.Grep(re, file, searchOptions, true)
 
 }
