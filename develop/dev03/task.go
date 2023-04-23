@@ -25,8 +25,10 @@ import (
 	"bufio"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -37,6 +39,7 @@ type SortParams struct {
 	numerical bool
 	reverse   bool
 	unique    bool
+	sorted    bool
 }
 
 // структура для удобства сортировки по полям
@@ -58,6 +61,9 @@ func Sort(file *os.File, params SortParams) error {
 		line := scanner.Text()
 		lines = append(lines, line)
 	}
+
+	checker := make([]string, len(lines))
+	copy(checker, lines)
 
 	if params.column != 0 {
 		orderMap := make([]Order, 0)
@@ -111,6 +117,13 @@ func Sort(file *os.File, params SortParams) error {
 		})
 	}
 
+	if params.sorted {
+		if reflect.DeepEqual(checker, lines) {
+			fmt.Println("Данные уже отсортированы")
+			return nil
+		}
+	}
+
 	if params.reverse {
 		for i, j := 0, len(lines)-1; i < j; i, j = i+1, j-1 {
 			lines[i], lines[j] = lines[j], lines[i]
@@ -139,14 +152,15 @@ func Sort(file *os.File, params SortParams) error {
 func main() {
 
 	var (
-		column                     int
-		numerical, reverse, unique bool
+		column                             int
+		numerical, reverse, unique, sorted bool
 	)
 
 	flag.IntVar(&column, "k", 0, "Usage: выбрать колонку для сортировки")
 	flag.BoolVar(&numerical, "n", false, "Usage: сортировать по числовому значению")
 	flag.BoolVar(&reverse, "r", false, "Usage: сортировать в обратном порядке")
 	flag.BoolVar(&unique, "u", false, "Usage: не выводить повторяющиеся строки")
+	flag.BoolVar(&sorted, "c", false, "Usage: проверяет, отсортированы ли данные")
 
 	flag.Parse()
 
@@ -155,6 +169,7 @@ func main() {
 		numerical: numerical,
 		reverse:   reverse,
 		unique:    unique,
+		sorted:    sorted,
 	}
 
 	file, err := os.Open("text.txt")
