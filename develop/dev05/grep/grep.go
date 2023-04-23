@@ -14,6 +14,7 @@ type SearchOptions struct {
 	IgnoreFlag, InvertFlag, FixedFlag, LineNumFlag bool
 }
 
+// функция для формирования регулярного выражения
 func FormRegex(pattern string, options SearchOptions) string {
 	var regex string
 
@@ -49,6 +50,7 @@ func Grep(regex *regexp.Regexp, file *os.File, options SearchOptions, testmode b
 		iterate    int
 		outputFile *os.File
 	)
+	// для тестирования
 	if testmode {
 		outputFile, _ = os.Create("output.txt")
 		defer outputFile.Close()
@@ -89,6 +91,7 @@ func Grep(regex *regexp.Regexp, file *os.File, options SearchOptions, testmode b
 		iterate = len(findings)
 	}
 
+	// формирование итоговой строки
 	for line := 0; line < iterate; line++ {
 		if testmode {
 			if options.LineNumFlag {
