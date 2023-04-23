@@ -1,3 +1,14 @@
+/*
+
+Реализовать утилиту аналог консольной команды cut (man cut). Утилита должна принимать строки через STDIN, разбивать по разделителю (TAB) на колонки и выводить запрошенные.
+
+Реализовать поддержку утилитой следующих ключей:
+-f - "fields" - выбрать поля (колонки)
+-d - "delimiter" - использовать другой разделитель
+-s - "separated" - только строки с разделителем
+
+*/
+
 package main
 
 import (
@@ -14,6 +25,7 @@ import (
 
 type fieldFlags []int
 
+// реализация методов интерфейса для флагов
 func (i *fieldFlags) String() string {
 	return "my string representation"
 }
@@ -34,6 +46,7 @@ func Cut(fields fieldFlags, delimeter string, separated bool) error {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		matches := make([]string, 0, len(scanner.Text()))
+		// выходим по CTRL+D
 		if err := scanner.Err(); err != nil {
 			if err == io.EOF {
 				break
