@@ -1,3 +1,19 @@
+/*
+
+Необходимо реализовать свой собственный UNIX-шелл-утилиту с поддержкой ряда простейших команд:
+
+- cd <args> - смена директории (в качестве аргумента могут быть то-то и то)
+- pwd - показать путь до текущего каталога
+- echo <args> - вывод аргумента в STDOUT
+- kill <args> - "убить" процесс, переданный в качесте аргумента (пример: такой-то пример)
+- ps - выводит общую информацию по запущенным процессам в формате *такой-то формат*
+
+Так же требуется поддерживать функционал fork/exec-команд
+
+Дополнительно необходимо поддерживать конвейер на пайпах (linux pipes, пример cmd1 | cmd2 | .... | cmdN).
+
+*/
+
 package main
 
 import (
@@ -40,11 +56,11 @@ func Execute(arguments []string) error {
 			fmt.Println("There are no processes")
 		}
 		fmt.Println(string(processes))
-
+	// убиваем процесс по его PID
 	case "kill":
 		var pid int
-		for _, arg := range arguments[1:] {
-			if arg[0] != '-' {
+		for _, arg := range arguments[1:] { // ищем PID
+			if arg[0] != '-' { // может быть статус для kill
 				pidConverted, err := strconv.Atoi(arg)
 				if err != nil {
 					fmt.Println("Wrong PID. To find PID you can type \"ps -e\"")
