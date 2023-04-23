@@ -1,3 +1,21 @@
+/*
+
+
+Реализовать простейший telnet-клиент.
+
+Примеры вызовов:
+go-telnet --timeout=10s host port go-telnet mysite.ru 8080 go-telnet --timeout=3s 1.1.1.1 123
+
+Требования:
+Программа должна подключаться к указанному хосту (ip или доменное имя + порт) по протоколу TCP.
+После подключения STDIN программы должен записываться в сокет, а данные полученные и сокета должны выводиться в STDOUT
+Опционально в программу можно передать таймаут на подключение к серверу (через аргумент --timeout, по умолчанию 10s)
+При нажатии Ctrl+D программа должна закрывать сокет и завершаться.
+Если сокет закрывается со стороны сервера, программа должна также завершаться. При подключении к несуществующему сервер,
+Программа должна завершаться через timeout
+
+*/
+
 package main
 
 import (
@@ -26,9 +44,9 @@ func main() {
 
 	host := flag.Arg(0)
 	port := flag.Arg(1)
-	server.RunServer(":" + port)
+	server.RunServer(":" + port) // создаём сервер
 
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), *timeout)
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), *timeout) // подключаемся по tcp к созданному серверу
 	if err != nil {
 		fmt.Println("Error connecting to server")
 		os.Exit(1)
@@ -44,10 +62,11 @@ func main() {
 	signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	go func() {
-		<-interrupt
+		<-interrupt // для закрытия сокета по CTRL+D
 		cancel()
 	}()
 
+	// пишем в сокет
 	go func() {
 		reader := bufio.NewReader(os.Stdin)
 		for {
@@ -71,6 +90,7 @@ func main() {
 		}
 	}()
 
+	// читаем из сокета
 	go func() {
 		reader := bufio.NewReader(conn)
 		for {
