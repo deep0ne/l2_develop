@@ -1,5 +1,23 @@
 package main
 
+/*
+Создать Go-функцию, осуществляющую примитивную распаковку строки, содержащую повторяющиеся символы/руны, например:
+"a4bc2d5e" => "aaaabccddddde"
+"abcd" => "abcd"
+"45" => "" (некорректная строка)
+"" => ""
+
+Дополнительно
+Реализовать поддержку escape-последовательностей.
+Например:
+qwe\4\5 => qwe45 (*)
+qwe\45 => qwe44444 (*)
+qwe\\5 => qwe\\\\\ (*)
+
+В случае если была передана некорректная строка, функция должна возвращать ошибку. Написать unit-тесты.
+
+*/
+
 import (
 	"bufio"
 	"errors"
@@ -24,7 +42,7 @@ func Unpack(word string) (string, error) {
 	for len(word) > 0 {
 		prev = rune(word[idx])
 		word = word[idx+1:]
-		if prev == '\\' {
+		if prev == '\\' { // обработка escape последовательностей
 			if len(word) == 0 {
 				return "", errors.New("Неверная строка")
 			}
@@ -52,14 +70,14 @@ func Unpack(word string) (string, error) {
 				}
 			}
 		} else {
-			numIndex := strings.IndexFunc(word, func(r rune) bool { return !unicode.IsDigit(r) })
+			numIndex := strings.IndexFunc(word, func(r rune) bool { return !unicode.IsDigit(r) }) // ищем индекс первого НЕ числа
 			if numIndex == -1 {
-				numIndex = len(word)
+				numIndex = len(word) // значит строка заканчивается числом
 			}
 			if numIndex == 0 {
 				sb.WriteRune(prev)
 			} else {
-				num, _ := strconv.Atoi(word[:numIndex])
+				num, _ := strconv.Atoi(word[:numIndex]) // всё, что было до буквы - число. конвертируем
 				sb.WriteString(strings.Repeat(string(prev), num))
 				word = word[numIndex:]
 			}
