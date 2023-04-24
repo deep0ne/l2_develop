@@ -1,7 +1,5 @@
-1 1 1
-1 2 3
-3 2 1
-1 1 1
-4 0 5
-6 4 2
-2 4 6
+10M December
+2K October
+1G November
+100 June
+20 May
