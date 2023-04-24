@@ -26,10 +26,6 @@ import (
 	"strings"
 )
 
-func LinuxPipes(arguments []string) error {
-	return nil
-}
-
 func Execute(arguments []string) error {
 	command := arguments[0]
 	switch command {
