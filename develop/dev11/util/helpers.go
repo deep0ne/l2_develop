@@ -21,7 +21,7 @@ func EventParser(r *http.Request) (int, domain.Event, error) {
 	userId := r.Form.Get("user_id")
 	ID, err := strconv.Atoi(userId)
 	if err != nil {
-		return 0, domain.Event{}, errors.New("Невалидный ID")
+		return 0, domain.Event{}, errors.New(fmt.Sprintf("Невалидный ID: %v", userId))
 	}
 	eventName := r.Form.Get("event_name")
 	eventDate := r.Form.Get("date")

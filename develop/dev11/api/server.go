@@ -60,6 +60,7 @@ func (server *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 
 	server.Store[ID] = append(server.Store[ID], event)
 
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(map[string]string{"result": fmt.Sprintf("Event Юзера %d создан успешно", ID)})
 	if err != nil {
 		util.JSONError(w, err, http.StatusInternalServerError)
@@ -96,6 +97,7 @@ func (server *Server) updateEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
+	var deleted bool
 	if r.Method != "POST" {
 		util.JSONError(w, errors.New("Method not allowed"), http.StatusMethodNotAllowed)
 		return
@@ -114,7 +116,13 @@ func (server *Server) deleteEvent(w http.ResponseWriter, r *http.Request) {
 	for i, e := range events {
 		if e.Name == event.Name {
 			events = append(events[:i], events[i+1:]...)
+			deleted = true
 		}
+	}
+
+	if !deleted {
+		util.JSONError(w, errors.New(fmt.Sprintf("Встречи с именем %s не существует", event.Name)), http.StatusBadRequest)
+		return
 	}
 
 	if len(events) == 0 {
