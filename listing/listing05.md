@@ -43,4 +43,4 @@ fmt.Printf("Underlying Value: %v\n", err)
 Underlying Type: *main.customError
 Underlying Value: <nil>
 ```
-Вместо интерфейса ошибки из функции возвращается указатель на customError. Поэтому мы и заходим в блок с условием `if err != nil`, потому что для того, чтобы `err` являлась `nil`, у неё должен быть `nil` underlaying type. 
+Из функции возвращается указатель на customError с `nil` значением. Поэтому мы и заходим в блок с условием `if err != nil`, потому что для того, чтобы `err` являлась `nil`, у неё должен быть `nil` underlying type. 
